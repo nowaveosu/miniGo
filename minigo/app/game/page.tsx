@@ -38,7 +38,7 @@ const Game = () => {
 
     return (
         <>
-            <h1>Expand Your Territory</h1>
+            <h1>Expand Your Territory!</h1>
             <div className='buttonContainer'>
                 <button onClick={handleGiveupClick}>giveup</button>
             </div>
