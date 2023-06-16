@@ -1,3 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+:root {
+  --font-family: 'Noto Sans KR', sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-family);
+}
+
 h1 {
   text-align: center;
   font-size: 30px;
