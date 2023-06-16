@@ -10,7 +10,7 @@ const Home = () => {
     const [matching, setMatching] = useState(false);
     const [matched, setMatched] = useState(false);
     const socket = io();
-    socket.on('matched', ({ opponent }) => {
+    socket.on('start', ({ opponent }) => {
         console.log(`Matched with ${opponent}`);
         setMatched(true);
         router.push('/game');
@@ -24,7 +24,7 @@ const Home = () => {
     const handleCancelClick = () => {
         setMatching(false);
         setMatched(false);
-        socket.emit('cancel');
+        // TODO: emit cancel event
     }
 
     return (
