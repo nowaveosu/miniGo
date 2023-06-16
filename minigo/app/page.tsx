@@ -9,7 +9,7 @@ const Home = () => {
     const router = useRouter();
     const [matching, setMatching] = useState(false);
     const [matched, setMatched] = useState(false);
-    const socket = io();
+    const socket = io('http://ec2-3-129-67-129.us-east-2.compute.amazonaws.com');
     socket.on('start', ({ opponent }) => {
         console.log(`Matched with ${opponent}`);
         setMatched(true);

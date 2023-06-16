@@ -6,7 +6,7 @@ import '../globals.css';
 const Game = () => {
     const [stones, setStones] = useState<string[][]>([]);
     const [currentTurn, setCurrentTurn] = useState('');
-    const socket = io();
+    const socket = io('http://ec2-3-129-67-129.us-east-2.compute.amazonaws.com');
     useEffect(() => {
         socket.on('yourTurn', () => {
             setCurrentTurn('me');
