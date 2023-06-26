@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
-
 const io = new Server();
+
 
 interface Game {
     player1: string;
