@@ -1,58 +1,69 @@
 "use client"
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { io } from 'socket.io-client';
-import './globals.css'
+import React, { useState } from 'react';
+import './globals.css';
 
-const Home = () => {
-    const router = useRouter();
-    const [matching, setMatching] = useState(false);
-    const [matched, setMatched] = useState(false);
-    const socket = io('http://ec2-3-129-67-129.us-east-2.compute.amazonaws.com');
-    socket.on('start', ({ opponent }) => {
-        console.log(`Matched with ${opponent}`);
-        setMatched(true);
-        router.push('/game');
-    });
+const Game = () => {
+    const boardSize = 9;
+    const rows = Array.from({ length: boardSize }, (_, i) => i);
+    const columns = Array.from({ length: boardSize }, (_, i) => i);
+    const center = Math.floor(boardSize / 2);
+    const initialStones = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+    initialStones[center][center] = 'red';
+    const [stones, setStones] = useState(initialStones);
+    const [currentColor, setCurrentColor] = useState('black');
+    const [history, setHistory] = useState<{ row: number; column: number }[]>([]);
 
-    const handlePlayClick = () => {
-        setMatching(true);
-        socket.emit('play');
+    const handleCellClick = (row: number, column: number) => {
+        if (stones[row][column] !== null) return;
+        const newStones = [...stones];
+        newStones[row][column] = currentColor;
+        setStones(newStones);
+        setCurrentColor(currentColor === 'black' ? 'green' : 'black');
+        setHistory([...history, { row, column }]);
     }
 
-    const handleCancelClick = () => {
-        setMatching(false);
-        setMatched(false);
-        // TODO: emit cancel event
+    const handleResetClick = () => {
+        setStones(initialStones);
+        setCurrentColor('black');
+        setHistory([]);
+    }
+
+    const handleUndoClick = () => {
+        if (history.length === 0) return;
+        const newHistory = [...history];
+        const lastMove = newHistory.pop();
+        if (!lastMove) return;
+        const newStones = [...stones];
+        newStones[lastMove.row][lastMove.column] = null;
+        setStones(newStones);
+        setCurrentColor(currentColor === 'black' ? 'green' : 'black');
+        setHistory(newHistory);
     }
 
     return (
         <>
-            <h1>miniGo</h1>
-            {!matching && (
-                <button className='play' onClick={handlePlayClick}>
-                    플레이하기
-                </button>
-            )}
-            {matching && !matched && (
-                <>
-                    <div>게임을 찾는중...</div>
-                    <button className='cancel' onClick={handleCancelClick}>
-                        취소
-                    </button>
-                </>
-            )}
-            {matching && matched && (
-                <>
-                    <div>게임을 찾았습니다!</div>
-                    <button className='cancel' onClick={handleCancelClick}>
-                        취소
-                    </button>
-                </>
-            )}
+            <h1>Expand Your Territory</h1>
+            <div className='buttonContainer'>
+                <button onClick={handleResetClick}>reset</button>
+                <button onClick={handleUndoClick}>undo</button>
+            </div>
+            <table cellSpacing={0} cellPadding={0}>
+                <tbody>
+                    {rows.map(row => (
+                        <tr key={row}>
+                            {columns.map(column => (
+                                <td key={column} onClick={() => handleCellClick(row, column)}>
+                                    {stones[row][column] === 'black' && <div className="black-stone"></div>}
+                                    {stones[row][column] === 'green' && <div className="green-stone"></div>}
+                                    {stones[row][column] === 'red' && <div className="red-stone"></div>}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </>
     );
 }
 
-export default Home;
+export default Game;
