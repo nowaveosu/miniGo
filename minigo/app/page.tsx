@@ -14,33 +14,44 @@ const Game = () => {
     const [currentColor, setCurrentColor] = useState('black');
     const [history, setHistory] = useState<{ row: number; column: number }[]>([]);
     const [connected, setConnected] = useState<boolean>(false);
-
+    const [currentUser, setCurrentUser] = useState('black'); // 현재 사용자 (black 또는 green)
+    const [isMyTurn, setIsMyTurn] = useState(true); // 현재 사용자의 턴 여부
+    const socket = new (ClientIO as any)('http://localhost:3000', {
+            path: "/api/socket/io",
+            addTrailingSlash: false,
+    });
 
 
     useEffect((): any => {
-        const socket = new (ClientIO as any)('http://localhost:3000', {
-          path: "/api/socket/io",
-          addTrailingSlash: false,
-        });
+        
     
         // log socket connection
         socket.on("connect", () => {
-          console.log("SOCKET CONNECTED!", socket.id);
-          setConnected(true);
+            console.log("SOCKET CONNECTED!", socket.id);
+            setConnected(true);
+            socket.emit("user", currentUser);
         });
-    
+        socket.on("turn", (turn: boolean) => {
+            setIsMyTurn(turn);
+        });
         // socket disconnet onUnmount if exists
         if (socket) return () => socket.disconnect();
-      }, []);
+    }, [currentUser]);
 
     const handleCellClick = (row: number, column: number) => {
         if (stones[row][column] !== null) return;
+        if (!isMyTurn) return; // 상대방 턴일 때는 클릭이 동작하지 않음
+    
         const newStones = [...stones];
-        newStones[row][column] = currentColor;
+        newStones[row][column] = currentUser;
         setStones(newStones);
-        setCurrentColor(currentColor === 'black' ? 'green' : 'black');
+    
+        // 턴 정보 서버에 전송
+        socket.emit("turn", !isMyTurn);
+    
+        setCurrentUser(currentUser === 'black' ? 'green' : 'black');
         setHistory([...history, { row, column }]);
-    }
+      }
 
     const handleResetClick = () => {
         setStones(initialStones);
