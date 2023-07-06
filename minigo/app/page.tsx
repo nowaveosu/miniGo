@@ -1,5 +1,6 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { io as ClientIO } from "socket.io-client";
 import './globals.css';
 
 const Game = () => {
@@ -12,6 +13,25 @@ const Game = () => {
     const [stones, setStones] = useState(initialStones);
     const [currentColor, setCurrentColor] = useState('black');
     const [history, setHistory] = useState<{ row: number; column: number }[]>([]);
+    const [connected, setConnected] = useState<boolean>(false);
+
+
+
+    useEffect((): any => {
+        const socket = new (ClientIO as any)('http://localhost:3000', {
+          path: "/api/socket/io",
+          addTrailingSlash: false,
+        });
+    
+        // log socket connection
+        socket.on("connect", () => {
+          console.log("SOCKET CONNECTED!", socket.id);
+          setConnected(true);
+        });
+    
+        // socket disconnet onUnmount if exists
+        if (socket) return () => socket.disconnect();
+      }, []);
 
     const handleCellClick = (row: number, column: number) => {
         if (stones[row][column] !== null) return;
