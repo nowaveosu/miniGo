@@ -4,6 +4,7 @@ import { io as ClientIO } from "socket.io-client";
 import './globals.css';
 
 const Game = () => {
+    //const boardSize = 10;
     const boardSize = 9;
     const rows = Array.from({ length: boardSize }, (_, i) => i);
     const columns = Array.from({ length: boardSize }, (_, i) => i);
@@ -23,8 +24,6 @@ const Game = () => {
 
 
     useEffect((): any => {
-        
-    
         // log socket connection
         socket.on("connect", () => {
             console.log("SOCKET CONNECTED!", socket.id);
@@ -49,7 +48,6 @@ const Game = () => {
         // 턴 정보 서버에 전송
         socket.emit("turn", !isMyTurn);
     
-        setCurrentUser(currentUser === 'black' ? 'green' : 'black');
         setHistory([...history, { row, column }]);
       }
 
